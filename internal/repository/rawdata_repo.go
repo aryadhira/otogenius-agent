@@ -11,6 +11,7 @@ import (
 
 type RawdataRepo interface {
 	InsertRawData(ctx context.Context, rawdata models.RawData) error
+	GetRawData(ctx context.Context) ([]models.RawData, error)
 }
 
 type RawDataImp struct {
@@ -44,4 +45,35 @@ func (r *RawDataImp) InsertRawData(ctx context.Context, rawdata models.RawData) 
 	)
 
 	return err
+}
+
+func (r *RawDataImp) GetRawData(ctx context.Context) ([]models.RawData, error) {
+	query := `SELECT id, brand, model, title, varian, fuel, transmission, image, price, scrape_date from rawdata`
+
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []models.RawData
+	for rows.Next() {
+		data := models.RawData{}
+		err := rows.Scan(
+			&data.Id,
+			&data.Brand,
+			&data.Model,
+			&data.Title,
+			&data.Varian,
+			&data.Transmission,
+			&data.Image,
+			&data.Price,
+			&data.ScrapeDate,
+		)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, data)
+	}
+	return results, nil
 }
