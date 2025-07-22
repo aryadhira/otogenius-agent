@@ -2,8 +2,10 @@ package scrapper
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/aryadhira/otogenius-agent/internal/models"
@@ -12,16 +14,18 @@ import (
 )
 
 type OlxScrapper struct {
-	ctx   context.Context
-	db    repository.RawdataRepo
-	colly *colly.Collector
+	ctx    context.Context
+	db     repository.RawdataRepo
+	master repository.BrandModelRepo
+	colly  *colly.Collector
 }
 
-func NewOlxScrapper(ctx context.Context, db repository.RawdataRepo, colly *colly.Collector) ScrapperInterface {
+func NewOlxScrapper(ctx context.Context, db repository.RawdataRepo, master repository.BrandModelRepo, colly *colly.Collector) ScrapperInterface {
 	return &OlxScrapper{
-		ctx:   ctx,
-		db:    db,
-		colly: colly,
+		ctx:    ctx,
+		db:     db,
+		master: master,
+		colly:  colly,
 	}
 }
 
@@ -39,11 +43,8 @@ func (s *OlxScrapper) scrapAdsUrl(url string) []string {
 	return urls
 }
 
-func (s *OlxScrapper) scrapAdsData(urlPrefix, brand, model string) *models.RawData {
-	baseUrl := os.Getenv("OLX_URL")
-	adsUrl := baseUrl + urlPrefix
-
-	info := new(models.RawData)
+func (s *OlxScrapper) scrapAdsData(url, brand, model string) models.RawData {
+	info := models.RawData{}
 	info.Brand = brand
 	info.Model = model
 	info.ScrapeDate = time.Now()
@@ -82,44 +83,44 @@ func (s *OlxScrapper) scrapAdsData(urlPrefix, brand, model string) *models.RawDa
 		info.Price = h.Text
 	})
 
-	s.colly.Visit(adsUrl)
+	s.colly.Visit(url)
 
 	return info
-}
-
-func (s *OlxScrapper) extractDataPerAds(urls []string, brand, model string) []*models.RawData {
-	datas := []*models.RawData{}
-	for _, each := range urls {
-		data := s.scrapAdsData(each, brand, model)
-		datas = append(datas, data)
-	}
-
-	return datas
 }
 
 func (s *OlxScrapper) Run() error {
 	start := time.Now()
 
 	log.Println("Starting OLX scrapper...")
+
 	baseUrl := os.Getenv("OLX_URL")
-	scrapUrl := baseUrl + "/jakarta-dki_g2000007/mobil-bekas_c198/q-honda-civic"
 
-	datas := []*models.RawData{}
-	adsUrls := s.scrapAdsUrl(scrapUrl)
-
-	rawDatas := s.extractDataPerAds(adsUrls, "honda", "civic")
-	datas = append(datas, rawDatas...)
-
-	for _, each := range datas {
-		err := s.db.InsertRawData(s.ctx, each)
-		if err != nil {
-			return err
-		}
+	master, err := s.master.GetAllBrandModel()
+	if err != nil {
+		return err
 	}
 
-	log.Println("Scrapping done at:", time.Since(start).Minutes())
+	for _, each := range master {
+		// preparing scrapper url
+		modelName := strings.ReplaceAll(each.ModelName, " ", "-")
+		queryString := strings.ToLower(fmt.Sprintf("%s-%s", each.BrandName, modelName))
+		baseQueryUrl := "/jakarta-dki_g2000007/mobil-bekas_c198/q-"
+		scrapUrlByModel := fmt.Sprintf("%s%s%s", baseUrl, baseQueryUrl, queryString)
+		log.Println("scrapping : ", scrapUrlByModel)
+
+		adsUrl := s.scrapAdsUrl(scrapUrlByModel)
+		for _, url := range adsUrl {
+			ads := baseUrl + url
+			data := s.scrapAdsData(ads, each.BrandName, each.ModelName)
+			err = s.db.InsertRawData(s.ctx, data)
+			if err != nil {
+				return err
+			}
+		}
+		time.Sleep(1 * time.Second)
+	}
+
+	log.Println("Scrapping done at:", time.Since(start).Seconds())
 
 	return nil
 }
-
-// https://www.olx.co.id/item/pajak-panjang-honda-civic-15-turbo-bensin-at-2017-iid-936635550

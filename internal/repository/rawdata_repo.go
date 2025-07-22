@@ -10,7 +10,7 @@ import (
 )
 
 type RawdataRepo interface {
-	InsertRawData(ctx context.Context, rawdata *models.RawData) error
+	InsertRawData(ctx context.Context, rawdata models.RawData) error
 }
 
 type RawDataImp struct {
@@ -25,7 +25,7 @@ func NewRawData(ctx context.Context, db *sql.DB) RawdataRepo {
 	}
 }
 
-func (r *RawDataImp) InsertRawData(ctx context.Context, rawdata *models.RawData) error {
+func (r *RawDataImp) InsertRawData(ctx context.Context, rawdata models.RawData) error {
 	query := `INSERT INTO rawdata (id,brand,model,title,varian,fuel,transmission,image,price,source,scrape_date)
 			  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`
 
