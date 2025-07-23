@@ -65,6 +65,7 @@ func (r *RawDataImp) GetRawData(ctx context.Context) ([]models.RawData, error) {
 			&data.Model,
 			&data.Title,
 			&data.Varian,
+			&data.Fuel,
 			&data.Transmission,
 			&data.Image,
 			&data.Price,

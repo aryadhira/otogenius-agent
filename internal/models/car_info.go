@@ -14,5 +14,5 @@ type CarInfo struct {
 	ImageUrl       string    `json:"image_url"`
 	Price          float64   `json:"price"`
 	ScrapeDate     time.Time `json:"scrape_date"`
-	ScrapeDateIn   int       `json:"scrape_dateint"`
+	ScrapeDateInt  int       `json:"scrape_dateint"`
 }
