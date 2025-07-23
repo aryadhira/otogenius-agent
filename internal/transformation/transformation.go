@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aryadhira/otogenius-agent/internal/models"
 	"github.com/aryadhira/otogenius-agent/internal/repository"
@@ -36,6 +38,8 @@ func NewTransformation(ctx context.Context, db *sql.DB, rawdata repository.Rawda
 }
 
 func (t *TransformationImp) TransformCarInfoData() error {
+	start := time.Now()
+	log.Println("Transformation started ....")
 	// Get Raw Data
 	rawdatas, err := t.rawdata.GetRawData(t.ctx)
 	if err != nil {
@@ -54,6 +58,8 @@ func (t *TransformationImp) TransformCarInfoData() error {
 	}
 
 	// Loop to normalize raw data into car info data
+	log.Println("Start normalization")
+	carInfos := []models.CarInfo{}
 	for _, rawdata := range rawdatas {
 		if rawdata.Title == "" {
 			continue
@@ -64,8 +70,8 @@ func (t *TransformationImp) TransformCarInfoData() error {
 		carInfo.Brand = rawdata.Brand
 		carInfo.Model = rawdata.Model
 		carInfo.Varian = rawdata.Varian
-		carInfo.Fuel = rawdata.Fuel
-		carInfo.Transmission = rawdata.Transmission
+		carInfo.Fuel = transformFuel(rawdata.Fuel)
+		carInfo.Transmission = transformTransmission(rawdata.Transmission)
 		carInfo.ImageUrl = rawdata.Image
 		carInfo.ScrapeDate = rawdata.ScrapeDate
 
@@ -86,13 +92,46 @@ func (t *TransformationImp) TransformCarInfoData() error {
 			continue
 		}
 
-		err = t.carInfo.InsertCarData(carInfo)
-		if err != nil {
-			return err
-		}
+		carInfos = append(carInfos, carInfo)
 
 	}
+	log.Println("Normalization done")
+
+	log.Println("Saving normalize data")
+	// Insert Bulk Car Info
+	err = t.carInfo.BulkInsertCarData(carInfos)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Transformation done on: %vs\n", time.Since(start).Seconds())
+
 	return nil
+}
+
+func transformTransmission(transmission string) string {
+	trns := ""
+	if transmission == "Automatic" || transmission == "Manual" {
+		trns = transmission
+	}
+
+	if strings.Contains(strings.ToLower(transmission), "otomatis") || strings.Contains(strings.ToLower(transmission), "option.automatic") || strings.Contains(strings.ToLower(transmission), "triptonic") {
+		return "Automatic"
+	}
+
+	if strings.Contains(strings.ToLower(transmission), "option.manual") {
+		return "Manual"
+	}
+
+	return trns
+}
+
+func transformFuel(fuel string) string {
+	if strings.Contains(strings.ToLower(fuel), "option.petrol") {
+		return "Bensin"
+	}
+
+	return fuel
 }
 
 func extractYearFromTitle(s string) (int, error) {
