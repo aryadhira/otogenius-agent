@@ -117,6 +117,8 @@ func (c *CarInfoImp) GetCarData(filter map[string]any) ([]models.CarInfo, error)
 	query := "SELECT id, brand, model, production_year, category, varian, fuel, transmission, image_url, price, scrape_date, scrape_dateint FROM car_info "
 	finalQuery := parseFilter(query, filter)
 
+	fmt.Println(finalQuery)
+
 	rows, err := c.db.QueryContext(c.ctx, finalQuery)
 	if err != nil {
 		return nil, err
@@ -181,8 +183,14 @@ func filterFormatter(key string, val any) string {
 			tempStr = append(tempStr, fmt.Sprintf("'%s' ", each))
 		}
 		filterFormat = fmt.Sprintf("%s IN (%s) ", key, strings.Join(tempStr, ", "))
-	case "production_year", "price":
-		filterFormat = fmt.Sprintf("%s <= %v ", key, val)
+	case "production_year":
+		valInt := val.(float64)
+		thresholdYear := valInt - 2
+		filterFormat = fmt.Sprintf("%s >= %v AND %s <= %v ", key, thresholdYear, key, val)
+	case "price":
+		valFloat := val.(float64)
+		thresholdPrice := valFloat - 20000000
+		filterFormat = fmt.Sprintf("%s >= %v AND %s <= %v ", key, thresholdPrice, key, val)
 	default:
 		filterFormat = fmt.Sprintf("%s = '%s' ", key, val)
 	}

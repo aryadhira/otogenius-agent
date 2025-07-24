@@ -1,0 +1,50 @@
+Frequently Asked Question (FAQ)
+
+ Question : What is Sedan?
+ Answer : Sedan is is a passenger car classification with a three-box body design, four doors, and two rows of seats and having trunk in the third box.
+
+ Question : What is SUV? 
+ Answer : SUV stands for Sport Utility Vehicle,is a car classification that combines elements of road-going passenger cars with features from off-road vehicles, such as raised ground clearance and four-wheel drive.
+ 
+ Question : What is MPV? 
+ Answer : MPV stands for Multipurpose Vehicle, is a car classification for vehicles designed to transport passengers in the rear seating row(s), with reconfigurable seats in two or three rows.
+ 
+ Question : What is Hatchback? 
+ Answer : Hatchback is a car body configuration with a rear door that swings upward to provide access to the main interior of the car as a cargo area rather than just to a separated trunk.
+ 
+ Question : How much capacity of Sedan? 
+ Answer : Sedan ideally can load 4 peoples, 2 in front and 2 in behind.
+ 
+ Question : How much capacity of SUV? 
+ Answer : SUV ideally can load up to 7 peoples.
+ 
+ Question : How much capacity of MPV? 
+ Answer : MPV ideally can load up to 9 peoples. for some car model it can load up to 11 peoples because that MPV design for public transport.
+ 
+ Question : How much capacity of Hatchback? 
+ Answer : Hatchback ideally can load 4 peoples, 2 in front and 2 in behind.
+ 
+ Question : What is purpose of Sedan?
+ Answer :  Sedans have many purposes, including:
+           Comfort: Sedans are known for their comfortable interiors, with ample legroom and headroom. They are also quieter and smoother than other cars due to their better insulation and aerodynamics. 
+           Fuel efficiency: Sedans are generally more fuel-efficient than larger vehicles like SUVs and trucks. 
+           Accessibility: Sedans are lower to the ground, making it easier for passengers to get in and out. 
+           Safety: Sedans have a lower center of gravity and relatively low ground clearance, which helps with stability and balance. 
+           Versatility: Sedans come in a variety of models, from compact city cars to large family-friendly vehicles. 
+           Affordability: Sedans can be more affordable than SUVs, and there is often a lot of competition between brands. 
+           Style: Sedans are known for their classic design, with sleek lines and a proportionate build. 
+ 
+ Question : What is purpose of SUV? 
+ Answer :  SUVs, or Sport Utility Vehicles, are versatile vehicles that can handle a variety of terrains and have many purposes, including: Passenger and cargo space: SUVs have a lot of space for passengers, luggage, pets, and work tools. They often have two or three rows of seating and can accommodate large groups.  Off-road capabilities: SUVs are designed to handle rugged terrain and city driving. They have a high ground clearance, four-wheel drive systems, and large tires with deep tread patterns.  Towing and hauling: SUVs have strong engines and powerful towing capabilities.  Comfort: SUVs have spacious interiors with enhanced passenger comfort.  Safety: Some SUVs have Vehicle Stability Control (VSC) to help prevent skidding and ensure stability.  SUVs have evolved over time from military off-road vehicles to one of the most popular car categories available.
+
+ Question : What is purpose of MPV? 
+ Answer :  The purpose of an MPV (Multi Purpose Vehicle) is to be a practical and comfortable car that can be used for a variety of situations and needs. MPVs are often used as family cars because they can carry a large number of passengers and have a spacious cabin. They are also popular with car rental companies and online taxi services. - Seating capacity     MPVs can carry up to nine passengers, compared to a sedan which can only carry five.  - Luggage space     MPVs have more room for luggage, and often have folding seats to increase space.  - Ground clearance     MPVs have a high ground clearance, which makes them easier to drive on unstable roads.  - Price     MPVs are usually priced within an affordable range.  - Resale price     MPVs are in high demand, so they can be resold without worrying about depreciation. 
+
+ Question : What is purpose of Hatchback? 
+ Answer :  Hatchbacks are cars with a large rear door that opens upwards to provide access to a spacious cargo area. They are versatile and practical, and are often used for a variety of purposes, including: 
+           City driving: Hatchbacks are easy to maneuver and park in tight spaces. They have a smaller turning radius than sedans or SUVs. 
+           Fuel efficiency: Hatchbacks are often more fuel-efficient than other types of cars. 
+           Storage and passengers: Hatchbacks have plenty of space for passengers and cargo. The rear seats can be folded down to create more room for luggage, pets, or bulky items. 
+           Practicality: Hatchbacks are ideal for urban drivers, commuters, and travelers who value practicality and convenience. 
+           Easier loading and unloading: The lower cargo floor height of a hatchback can make it easier to load and unload gear. 
+           Security: Hatchbacks feature a detachable stiff parcel shelf or a roll-up cover for the cargo area. 
