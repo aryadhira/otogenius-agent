@@ -14,6 +14,7 @@ import (
 	"github.com/aryadhira/otogenius-agent/internal/migration"
 	"github.com/aryadhira/otogenius-agent/internal/repository"
 	"github.com/aryadhira/otogenius-agent/internal/storages"
+	"github.com/aryadhira/otogenius-agent/internal/tools"
 
 	"github.com/joho/godotenv"
 )
@@ -36,37 +37,9 @@ func main() {
 	}
 
 	ctx := context.Background()
-	// rawdata := repository.NewRawData(ctx, db)
 	masterdata := repository.NewBrandModel(ctx, db)
-	// c := colly.NewCollector()
-	// scrp := scrapper.NewOlxScrapper(ctx, rawdata, masterdata, c)
 
-	// err = scrp.Run()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 	// carInfo := repository.NewCarRepo(ctx, db)
-	// transform := transformation.NewTransformation(ctx, db, rawdata, carInfo, masterdata)
-	// err = transform.TransformCarInfoData()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// filter := make(map[string]any)
-	// filter["brand"] = "Toyota,Honda,Mitsubishi"
-	// filter["model"] = "Corolla,Civic"
-	// filter["category"] = "Sedan"
-	// filter["price"] = 185000000
-	// filter["production_year"] = 2015
-
-	// res, err := carInfo.GetCarData(filter)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// for _, each := range res {
-	// 	data := fmt.Sprintf("%s %s %s %v %s %v", each.Brand, each.Model, each.Category, each.ProductionYear, each.Varian, int(each.Price))
-	// 	log.Println(data)
-	// }
 
 	temperatureStr := os.Getenv("TEMPERATURE")
 	maxTokenStr := os.Getenv("MAX_TOKENS")
@@ -76,7 +49,7 @@ func main() {
 	url := os.Getenv("LLM_URL")
 
 	client := llamacpp.NewLlamacppClient(url, temperature, maxToken, false)
-	// listTools := tools.RegisterTools()
+	listTools := tools.RegisterTools()
 	reader := bufio.NewReader(os.Stdin)
 
 	brandmodel, err := masterdata.GetAllBrandModel()
@@ -85,6 +58,7 @@ func main() {
 	}
 
 	extractor := agent.NewAgentExtractor(client, brandmodel)
+	recommendator := agent.NewAgentRecommendator(client, listTools)
 
 	fmt.Print("===================================================================================================\n")
 	fmt.Println("--------Welcome to Otogenius Agent--------")
@@ -101,7 +75,10 @@ func main() {
 			log.Fatal(err)
 		}
 
-		fmt.Println(res)
+		_, err = recommendator.Run(res.(string))
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 }

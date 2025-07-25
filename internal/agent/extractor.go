@@ -22,7 +22,7 @@ func NewAgentExtractor(client *llamacpp.LlamacppClient, masterdata []models.Bran
 }
 
 func (a *AgentExtractor) Run(prompt string) (any, error) {
-
+	fmt.Println("\x1b[3m start parsing user requirement")
 	systemMessage, err := getExtractorSystemPrompt(a.masterdata)
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func (a *AgentExtractor) Run(prompt string) (any, error) {
 	choice := response.Choices[0]
 	aiResponse := choice.Message.Content.(string)
 
-	fmt.Println(aiResponse)
+	fmt.Println("\x1b[3m parsed requirement", aiResponse)
 	// sanitize AI response additional string
 	sanitizedStr := strings.ReplaceAll(aiResponse, "```json", "")
 	sanitizedStr = strings.ReplaceAll(sanitizedStr, "```", "")
@@ -54,21 +54,13 @@ func (a *AgentExtractor) Run(prompt string) (any, error) {
 		return nil, err
 	}
 
-	// sanitize parameter
-	filter := make(map[string]any)
+	var filterPrompt strings.Builder
 	for key, val := range result {
-		if val == "" {
-			continue
-		}
-		if key == "production_year" {
-			if val.(float64) == 0 {
-				continue
-			}
-		}
-		filter[key] = val
+		str := fmt.Sprintf("%s : %v \n", key, val)
+		filterPrompt.WriteString(str)
 	}
 
-	return filter, nil
+	return filterPrompt.String(), nil
 }
 
 func getExtractorSystemPrompt(masterdata []models.BrandModel) (string, error) {

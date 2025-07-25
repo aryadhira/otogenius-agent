@@ -9,15 +9,20 @@ import (
 
 func GetToolDispatcher() map[string]interface{} {
 	return map[string]interface{}{
-		"read_wiki": ReadWiki,
+		// "read_wiki":       ReadWiki,
+		"get_car_catalog": GetCarCatalog,
 	}
 }
 
 func RegisterTools() []models.Tool {
 	return []models.Tool{
+		// {
+		// 	Type:     "function",
+		// 	Function: ReadWikiToolDescription(),
+		// },
 		{
 			Type:     "function",
-			Function: ReadWikiToolDescription(),
+			Function: GetCarCatalogToolDescription(),
 		},
 	}
 }
@@ -65,9 +70,10 @@ func ToolCalling(message models.Message) ([]models.Message, error) {
 				Content: fmt.Sprintf("Error calling %s: %v", toolCall.Function.Name, fnErr),
 			})
 		} else {
+			resultPrompt := fmt.Sprintf("result from tools : %v", fnRes)
 			toolCallHistory = append(toolCallHistory, models.Message{
-				Role:      "tool",
-				Content:   fnRes,
+				Role:      "user",
+				Content:   resultPrompt,
 				ToolCalls: []models.FunctionCall{},
 			})
 		}
@@ -82,6 +88,8 @@ func functionInputParser(funcName string, fnType reflect.Type, toolCall models.F
 	var err error
 
 	switch funcName {
+	case "get_car_catalog":
+		inputParam, err = ParseCarCatalogToolParameter(fnType, toolCall)
 	default:
 		err = fmt.Errorf("function name is empty")
 
