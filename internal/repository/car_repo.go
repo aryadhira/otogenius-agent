@@ -182,9 +182,7 @@ func filterFormatter(key string, val any) string {
 		}
 		filterFormat = fmt.Sprintf("%s IN (%s) ", key, strings.Join(tempStr, ", "))
 	case "production_year":
-		valInt := val.(int)
-		thresholdYear := valInt - 2
-		filterFormat = fmt.Sprintf("%s >= %v AND %s <= %v ", key, thresholdYear, key, val)
+		filterFormat = fmt.Sprintf("%s >= %v ", key, val)
 	case "price":
 		valFloat := val.(float64)
 		thresholdPrice := valFloat - 50000000

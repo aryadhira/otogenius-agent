@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aryadhira/otogenius-agent/internal/llamacpp"
+	"github.com/aryadhira/otogenius-agent/internal/llm"
 	"github.com/aryadhira/otogenius-agent/internal/models"
 )
 
 type AgentExtractor struct {
-	client     *llamacpp.LlamacppClient
+	client     llm.LlmProvider
 	masterdata []models.BrandModel
 }
 
-func NewAgentExtractor(client *llamacpp.LlamacppClient, masterdata []models.BrandModel) Agent {
+func NewAgentExtractor(client llm.LlmProvider, masterdata []models.BrandModel) Agent {
 	return &AgentExtractor{
 		client:     client,
 		masterdata: masterdata,

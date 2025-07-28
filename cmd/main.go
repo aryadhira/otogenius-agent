@@ -8,9 +8,10 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aryadhira/otogenius-agent/internal/agent"
-	"github.com/aryadhira/otogenius-agent/internal/llamacpp"
+	"github.com/aryadhira/otogenius-agent/internal/llm"
 	"github.com/aryadhira/otogenius-agent/internal/migration"
 	"github.com/aryadhira/otogenius-agent/internal/repository"
 	"github.com/aryadhira/otogenius-agent/internal/storages"
@@ -36,19 +37,25 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// llmModel := os.Getenv("OPENROUTER_MODEL")
+	llmUrl := os.Getenv("LLM_URL")
+	// apiKey := os.Getenv("OPENROUTER_API_KEY")
+
+	// openrouter, err := llm.NewOpenRouter(llmUrl, llmModel, apiKey)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
 	ctx := context.Background()
 	masterdata := repository.NewBrandModel(ctx, db)
-
-	// carInfo := repository.NewCarRepo(ctx, db)
 
 	temperatureStr := os.Getenv("TEMPERATURE")
 	maxTokenStr := os.Getenv("MAX_TOKENS")
 
 	temperature, _ := strconv.ParseFloat(temperatureStr, 64)
 	maxToken, _ := strconv.Atoi(maxTokenStr)
-	url := os.Getenv("LLM_URL")
+	llamacpp := llm.NewLlamaCpp(llmUrl, temperature, maxToken, false)
 
-	client := llamacpp.NewLlamacppClient(url, temperature, maxToken, false)
 	listTools := tools.RegisterTools()
 	reader := bufio.NewReader(os.Stdin)
 
@@ -57,8 +64,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	extractor := agent.NewAgentExtractor(client, brandmodel)
-	recommendator := agent.NewAgentRecommendator(client, listTools)
+	extractor := agent.NewAgentExtractor(llamacpp, brandmodel)
+	recommendator := agent.NewAgentRecommendator(llamacpp, listTools)
 
 	fmt.Print("===================================================================================================\n")
 	fmt.Println("--------Welcome to Otogenius Agent--------")
@@ -69,12 +76,14 @@ func main() {
 		fmt.Print("\nDescribe Your Requirement: ")
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
+		input = input + " /no_think"
 
 		res, err := extractor.Run(input)
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		time.Sleep(5 * time.Second)
 		_, err = recommendator.Run(res.(string))
 		if err != nil {
 			log.Fatal(err)

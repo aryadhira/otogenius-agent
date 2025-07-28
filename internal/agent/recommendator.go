@@ -4,17 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/aryadhira/otogenius-agent/internal/llamacpp"
+	"github.com/aryadhira/otogenius-agent/internal/llm"
 	"github.com/aryadhira/otogenius-agent/internal/models"
 	"github.com/aryadhira/otogenius-agent/internal/tools"
 )
 
 type AgentRecommendator struct {
-	client *llamacpp.LlamacppClient
+	client llm.LlmProvider
 	tools  []models.Tool
 }
 
-func NewAgentRecommendator(client *llamacpp.LlamacppClient, tools []models.Tool) Agent {
+func NewAgentRecommendator(client llm.LlmProvider, tools []models.Tool) Agent {
 	return &AgentRecommendator{
 		client: client,
 		tools:  tools,
@@ -52,8 +52,6 @@ func (a *AgentRecommendator) executor(messages *[]models.Message) error {
 		}
 
 		*messages = append(*messages, history...)
-		// *messages = append(*messages, models.Message{Role: "user", Content: "if there is no data from the tools then tell user data with that criteria is not found, ask them to refine the prompt, but if there is data from tools summarize that catalog list into tabular data"})
-		// *messages = append(*messages, models.Message{Role: "user", Content: "serve the result to user"})
 		a.executor(messages)
 	} else {
 		fmt.Printf("Assistant: %s\n \x1b[0m", aiResponse.Content)
@@ -68,8 +66,10 @@ func getRecommendatorSystemPrompt(tools []models.Tool) string {
 		%s
 		your task is providing latest catalog list of used car based on user request.
 		please paid attention very carefully on car information that user provide, please pass exactly same for tool param don't assume any parameter.
+		note: special for Brand and Model if user pass empty string just pass as it is even that required.
 		serve any data from tools as tabular data with this header : Brand, Model, Production Year, Category, Transmission, Price.
 		show distinct data based on this combination : Brand, Model, Production Year, Category, Transmission, Average Price.
+		if there is no data from tool, just respond 'No Car Found on That Criteria"
 	`
 
 	// if there is no data from the tools then tell user data with that criteria is not found, ask them to refine the prompt especially the mandatory field for tools.
@@ -83,7 +83,7 @@ func getRecommendatorSystemPrompt(tools []models.Tool) string {
 func getUserPrompt(prompt string) string {
 	promptTemplate := `
 		please give me latest catalog of used car based on this information :
-		%s
+		%s /no_think
 	`
 	return fmt.Sprintf(promptTemplate, prompt)
 }

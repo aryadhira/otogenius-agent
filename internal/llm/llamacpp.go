@@ -1,4 +1,4 @@
-package llamacpp
+package llm
 
 import (
 	"bytes"
@@ -10,15 +10,15 @@ import (
 	"github.com/aryadhira/otogenius-agent/internal/models"
 )
 
-type LlamacppClient struct {
+type LlamaCpp struct {
 	url         string
 	temperature float64
 	maxTokens   int
 	stream      bool
 }
 
-func NewLlamacppClient(url string, temperature float64, maxTokens int, stream bool) *LlamacppClient {
-	return &LlamacppClient{
+func NewLlamaCpp(url string, temperature float64, maxTokens int, stream bool) LlmProvider {
+	return &LlamaCpp{
 		url:         url,
 		temperature: temperature,
 		maxTokens:   maxTokens,
@@ -26,12 +26,12 @@ func NewLlamacppClient(url string, temperature float64, maxTokens int, stream bo
 	}
 }
 
-func (c *LlamacppClient) ChatCompletions(messages []models.Message, tools []models.Tool) (*models.LlmResponse, error) {
+func (l *LlamaCpp) ChatCompletions(messages []models.Message, tools []models.Tool) (*models.LlmResponse, error) {
 	reqBody := models.LlmRequest{
 		Messages:       messages,
-		Temperature:    c.temperature,
-		MaxTokens:      c.maxTokens,
-		Stream:         c.stream,
+		Temperature:    l.temperature,
+		MaxTokens:      l.maxTokens,
+		Stream:         l.stream,
 		Tools:          tools,
 		ToolChoice:     "auto",
 		ResponseFormat: map[string]string{"type": "text"},
@@ -42,7 +42,7 @@ func (c *LlamacppClient) ChatCompletions(messages []models.Message, tools []mode
 		return nil, fmt.Errorf("failed to marshal request body: %w", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, c.url, bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequest(http.MethodPost, l.url, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
