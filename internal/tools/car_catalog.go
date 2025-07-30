@@ -64,11 +64,11 @@ func GetCarCatalogToolDescription() models.Function {
 			"properties": map[string]interface{}{
 				"brand": map[string]interface{}{
 					"type":        "string",
-					"description": "The car brand eg Toyota,Honda etc. can be multiple by comma separated",
+					"description": "The car brand eg Toyota,Honda etc. can be multiple by comma separated, can be empty pass with empty string",
 				},
 				"model": map[string]interface{}{
 					"type":        "string",
-					"description": "The car brand eg Civic,Corolla etc. can be multiple by comma separated",
+					"description": "The car brand eg Civic,Corolla etc. can be multiple by comma separated, can be empty pass with empty string",
 				},
 				"category": map[string]interface{}{
 					"type":        "string",
@@ -82,7 +82,7 @@ func GetCarCatalogToolDescription() models.Function {
 				},
 				"production_year": map[string]interface{}{
 					"type":        "integer",
-					"description": "Car production year",
+					"description": "Car production year can be 0 as empty parameter",
 				},
 				"price": map[string]interface{}{
 					"type":        "number",

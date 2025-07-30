@@ -87,3 +87,7 @@ func getUserPrompt(prompt string) string {
 	`
 	return fmt.Sprintf(promptTemplate, prompt)
 }
+
+func (a *AgentRecommendator) RunContinues(prompt string, messages []models.Message) (any, error){
+	return nil, nil
+}

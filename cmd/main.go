@@ -8,7 +8,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/aryadhira/otogenius-agent/internal/agent"
 	"github.com/aryadhira/otogenius-agent/internal/llm"
@@ -64,8 +63,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	extractor := agent.NewAgentExtractor(llamacpp, brandmodel)
-	recommendator := agent.NewAgentRecommendator(llamacpp, listTools)
+	// extractor := agent.NewAgentExtractor(llamacpp, brandmodel)
+	// recommendator := agent.NewAgentRecommendator(llamacpp, listTools)
+	advisor := agent.NewAgentAdvisor(llamacpp, brandmodel, listTools)
+	// sysPrompt := agent.GetAdvisorSystemPrompt(listTools, brandmodel)
+
+	// messages := []models.Message{
+	// 	{Role: "system", Content: sysPrompt},
+	// }
 
 	fmt.Print("===================================================================================================\n")
 	fmt.Println("--------Welcome to Otogenius Agent--------")
@@ -78,16 +83,28 @@ func main() {
 		input = strings.TrimSpace(input)
 		input = input + " /no_think"
 
-		res, err := extractor.Run(input)
+		// messages = append(messages, models.Message{Role: "user", Content: input})
+
+		// _, err := advisor.RunContinues(input, messages)
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+
+		_, err = advisor.Run(input)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		time.Sleep(5 * time.Second)
-		_, err = recommendator.Run(res.(string))
-		if err != nil {
-			log.Fatal(err)
-		}
+		// res, err := extractor.Run(input)
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+
+		// time.Sleep(5 * time.Second)
+		// _, err = recommendator.Run(res.(string))
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
 	}
 
 }

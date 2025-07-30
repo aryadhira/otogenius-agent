@@ -114,7 +114,7 @@ func (c *CarInfoImp) BulkInsertCarData(carsInfo []models.CarInfo) error {
 func (c *CarInfoImp) GetCarData(filter map[string]any) ([]models.CarInfo, error) {
 	var err error
 	var results []models.CarInfo
-	query := "SELECT id, brand, model, production_year, category, varian, fuel, transmission, image_url, price, scrape_date, scrape_dateint FROM car_info "
+	query := "SELECT brand, model, production_year, category, varian, fuel, transmission, image_url, price FROM car_info "
 	finalQuery := parseFilter(query, filter)
 
 	rows, err := c.db.QueryContext(c.ctx, finalQuery)
@@ -126,7 +126,6 @@ func (c *CarInfoImp) GetCarData(filter map[string]any) ([]models.CarInfo, error)
 	for rows.Next() {
 		data := models.CarInfo{}
 		err = rows.Scan(
-			&data.Id,
 			&data.Brand,
 			&data.Model,
 			&data.ProductionYear,
@@ -136,8 +135,6 @@ func (c *CarInfoImp) GetCarData(filter map[string]any) ([]models.CarInfo, error)
 			&data.Transmission,
 			&data.ImageUrl,
 			&data.Price,
-			&data.ScrapeDate,
-			&data.ScrapeDateInt,
 		)
 		if err != nil {
 			return nil, err
@@ -168,13 +165,14 @@ func parseFilter(query string, filter map[string]any) string {
 		}
 		filterCount++
 	}
+	sb.WriteString("ORDER BY production_year DESC, price ASC LIMIT 15")
 	return sb.String()
 }
 
 func filterFormatter(key string, val any) string {
 	filterFormat := ""
 	switch key {
-	case "brand", "model":
+	case "brand", "model", "transmission":
 		strFilter := strings.Split(val.(string), ",")
 		tempStr := []string{}
 		for _, each := range strFilter {

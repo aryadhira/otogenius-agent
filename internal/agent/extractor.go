@@ -135,3 +135,7 @@ func getExtractorSystemPrompt(masterdata []models.BrandModel) (string, error) {
 
 	return fmt.Sprintf(sysMessageTemplate, brand.String(), model.String()), nil
 }
+
+func (a *AgentExtractor) RunContinues(prompt string, messages []models.Message) (any, error){
+	return nil, nil
+}
