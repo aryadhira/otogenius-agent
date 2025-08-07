@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"context"
 	"fmt"
 	"log"
 	"os"
@@ -12,7 +11,7 @@ import (
 	"github.com/aryadhira/otogenius-agent/internal/agent"
 	"github.com/aryadhira/otogenius-agent/internal/llm"
 	"github.com/aryadhira/otogenius-agent/internal/migration"
-	"github.com/aryadhira/otogenius-agent/internal/repository"
+	"github.com/aryadhira/otogenius-agent/internal/models"
 	"github.com/aryadhira/otogenius-agent/internal/storages"
 	"github.com/aryadhira/otogenius-agent/internal/tools"
 
@@ -45,8 +44,8 @@ func main() {
 	// 	log.Fatal(err)
 	// }
 
-	ctx := context.Background()
-	masterdata := repository.NewBrandModel(ctx, db)
+	// ctx := context.Background()
+	// masterdata := repository.NewBrandModel(ctx, db)
 
 	temperatureStr := os.Getenv("TEMPERATURE")
 	maxTokenStr := os.Getenv("MAX_TOKENS")
@@ -58,19 +57,20 @@ func main() {
 	listTools := tools.RegisterTools()
 	reader := bufio.NewReader(os.Stdin)
 
-	brandmodel, err := masterdata.GetAllBrandModel()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// brandmodel, err := masterdata.GetAllBrandModel()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	// extractor := agent.NewAgentExtractor(llamacpp, brandmodel)
 	// recommendator := agent.NewAgentRecommendator(llamacpp, listTools)
-	advisor := agent.NewAgentAdvisor(llamacpp, brandmodel, listTools)
+	// advisor := agent.NewAgentAdvisor(llamacpp, brandmodel, listTools)
 	// sysPrompt := agent.GetAdvisorSystemPrompt(listTools, brandmodel)
 
-	// messages := []models.Message{
-	// 	{Role: "system", Content: sysPrompt},
-	// }
+	// structured := agent.NewStructureOutput(llamacpp, listTools)
+
+	otogenius := agent.NewOtogenius(llamacpp, listTools)
+	messages := []models.Message{}
 
 	fmt.Print("===================================================================================================\n")
 	fmt.Println("--------Welcome to Otogenius Agent--------")
@@ -81,7 +81,7 @@ func main() {
 		fmt.Print("\nDescribe Your Requirement: ")
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
-		input = input + " /no_think"
+		// input = input + " /no_think"
 
 		// messages = append(messages, models.Message{Role: "user", Content: input})
 
@@ -90,10 +90,10 @@ func main() {
 		// 	log.Fatal(err)
 		// }
 
-		_, err = advisor.Run(input)
-		if err != nil {
-			log.Fatal(err)
-		}
+		// _, err = advisor.Run(input)
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
 
 		// res, err := extractor.Run(input)
 		// if err != nil {
@@ -105,6 +105,17 @@ func main() {
 		// if err != nil {
 		// 	log.Fatal(err)
 		// }
+
+		// _, err := structured.Run(input)
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+
+		history, err := otogenius.RunContinues(input, messages)
+		if err != nil {
+			log.Fatal(err)
+		}
+		messages = history.([]models.Message)
 	}
 
 }

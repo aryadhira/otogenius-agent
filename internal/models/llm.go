@@ -7,13 +7,14 @@ type Message struct {
 }
 
 type LlmRequest struct {
-	Messages       []Message         `json:"messages"`
-	Temperature    float64           `json:"temperature"`
-	MaxTokens      int               `json:"max_tokens"`
-	Stream         bool              `json:"stream"`
-	Tools          []Tool            `json:"tools"`
-	ToolChoice     string            `json:"tool_choice"`
-	ResponseFormat map[string]string `json:"response_format"`
+	Messages       []Message              `json:"messages"`
+	Temperature    float64                `json:"temperature"`
+	MaxTokens      int                    `json:"max_tokens"`
+	Stream         bool                   `json:"stream"`
+	Tools          []Tool                 `json:"tools"`
+	ToolChoice     string                 `json:"tool_choice"`
+	ResponseFormat map[string]string      `json:"response_format"`
+	JsonSchema     map[string]interface{} `json:"json_schema"`
 }
 
 type Choice struct {

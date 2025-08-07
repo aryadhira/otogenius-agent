@@ -99,3 +99,7 @@ func clientRequest(req *http.Request) (*http.Response, error) {
 
 	return resp, nil
 }
+
+func (o *OpenRouter) ChatCompletionsStructureOutput(messages []models.Message, tools []models.Tool, jsonSchema map[string]any) (*models.LlmResponse, error) {
+	return nil, nil
+}

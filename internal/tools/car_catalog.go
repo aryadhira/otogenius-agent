@@ -68,7 +68,7 @@ func GetCarCatalogToolDescription() models.Function {
 				},
 				"model": map[string]interface{}{
 					"type":        "string",
-					"description": "The car brand eg Civic,Corolla etc. can be multiple by comma separated, can be empty pass with empty string",
+					"description": "The car brand model eg Civic,Corolla etc. can be multiple by comma separated, can be empty pass with empty string",
 				},
 				"category": map[string]interface{}{
 					"type":        "string",
