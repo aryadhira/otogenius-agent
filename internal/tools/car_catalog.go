@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"strings"
 
 	"github.com/aryadhira/otogenius-agent/internal/models"
 	"github.com/aryadhira/otogenius-agent/internal/repository"
@@ -46,29 +45,25 @@ func GetCarCatalog(brand, model, category, transmission string, production_year 
 		return "", err
 	}
 
-	var carList strings.Builder
-	for _, each := range infos {
-		str := fmt.Sprintf("Brand: %s, Model: %s, Production Year: %v, Transmission: %s, Fuel: %s, Price: %v\n", each.Brand, each.Model, each.ProductionYear, each.Transmission, each.Fuel, int(each.Price))
-		carList.WriteString(str)
-	}
+	infosJson, _ := json.Marshal(infos)
 
-	return carList.String(), nil
+	return string(infosJson), nil
 }
 
 func GetCarCatalogToolDescription() models.Function {
 	return models.Function{
 		Name:        "get_car_catalog",
-		Description: "retrieve latest list of used car catalog",
+		Description: "Searches the used car database for listings that match the specified criteria.",
 		Parameters: map[string]interface{}{
 			"type": "object",
 			"properties": map[string]interface{}{
 				"brand": map[string]interface{}{
 					"type":        "string",
-					"description": "The car brand eg Toyota,Honda etc. can be multiple by comma separated, can be empty pass with empty string",
+					"description": "A comma-separated list of car brands (e.g., 'Toyota,Honda'). Use an empty string '' if no brands are specified",
 				},
 				"model": map[string]interface{}{
 					"type":        "string",
-					"description": "The car brand model eg Civic,Corolla etc. can be multiple by comma separated, can be empty pass with empty string",
+					"description": "A comma-separated list of car models (e.g., 'Civic,Corolla'). Use an empty string '' if no models are specified",
 				},
 				"category": map[string]interface{}{
 					"type":        "string",

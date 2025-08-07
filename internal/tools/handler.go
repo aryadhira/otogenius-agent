@@ -70,10 +70,9 @@ func ToolCalling(message models.Message) ([]models.Message, error) {
 				Content: fmt.Sprintf("Error calling %s: %v", toolCall.Function.Name, fnErr),
 			})
 		} else {
-			resultPrompt := fmt.Sprintf("result from tools : %v", fnRes)
 			toolCallHistory = append(toolCallHistory, models.Message{
 				Role:      "user",
-				Content:   resultPrompt,
+				Content:   fnRes,
 				ToolCalls: []models.FunctionCall{},
 			})
 		}
