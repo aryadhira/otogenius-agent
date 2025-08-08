@@ -103,3 +103,7 @@ func clientRequest(req *http.Request) (*http.Response, error) {
 func (o *OpenRouter) ChatCompletionsStructureOutput(messages []models.Message, tools []models.Tool, jsonSchema map[string]any) (*models.LlmResponse, error) {
 	return nil, nil
 }
+
+func (l *OpenRouter) GetEmbedding(text string) ([]float32, error) {
+	return []float32{}, nil
+}

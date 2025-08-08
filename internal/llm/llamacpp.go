@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/aryadhira/otogenius-agent/internal/models"
@@ -123,7 +122,49 @@ func (l *LlamaCpp) ChatCompletionsStructureOutput(messages []models.Message, too
 		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
 	}
 
-	log.Println(LlmResponse)
-
 	return &LlmResponse, nil
+}
+
+func (l *LlamaCpp) GetEmbedding(text string) ([]float32, error) {
+	reqBody := map[string]string{
+		"input": text,
+	}
+
+	jsonBody, err := json.Marshal(reqBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request body: %w", err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, l.url, bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("server return error")
+	}
+
+	var embeddingResponse models.EmbeddingResponse
+
+	err = json.Unmarshal(body, &embeddingResponse)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
+	}
+
+	return embeddingResponse.Data[0].Embedding, nil
+
 }

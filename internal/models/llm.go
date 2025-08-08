@@ -38,3 +38,21 @@ type LlmResponse struct {
 	Choices []Choice `json:"choices"`
 	Usage   Usage    `json:"usage"`
 }
+
+type UsageToken struct {
+	PromptTokens int `json:"prompt_tokens"`
+	TotalTokens  int `json:"total_tokens"`
+}
+
+type EmbeddingObject struct {
+	Embedding []float32 `json:"embedding"`
+	Index     int       `json:"index"`
+	Object    string    `json:"object"`
+}
+
+type EmbeddingResponse struct {
+	Model  string            `json:"model"`
+	Object string            `json:"object"`
+	Usage  UsageToken        `json:"usage"`
+	Data   []EmbeddingObject `json:"data"`
+}
