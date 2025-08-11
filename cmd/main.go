@@ -67,7 +67,7 @@ func main() {
 		{
 			brand : <string> optional (this will contains any brand that user mention, leave as empty string if user not mention any brand),
 			model : <string> optional(this will contains any model that user mention, leave as empty string if user not mention any model),
-			category : <string> mandatory (Enums: Sedan,SUV,MPV,Hatchback) you will clasify this value based on user prompt description judge by Body Style, Purpose, Seating Capacity, or Cargo Space,
+			category : <string> mandatory (Enums: Sedan,SUV,MPV,Hatchback) you will clasify this value based on this context %s,
 			price : <integer> mandatory you will extract user budget or preference price, fill 0 if user not mention,
 			production_year : <integer> optional you will extract any mentioned production_year of the car fill 0 if user not mention any year,
 			transmission : <string> (Enums:Automatic,Manual) optional you will extract any mentioned transmission type from user,  leave as empty string if user not mention any transmission type,
@@ -109,11 +109,8 @@ func main() {
 			"production_year" : 2010,
 			"transmission": "Automatic"
 		}
-
-		to fill the JSON result please refer this reference context don't do any guessing or assumption: 
-		%s
 	`
-	messages := []models.Message{}
+	// messages := []models.Message{}
 
 	fmt.Print("===================================================================================================\n")
 	fmt.Println("--------Welcome to Otogenius Agent--------")
@@ -130,7 +127,10 @@ func main() {
 			log.Fatal(err)
 		}
 
+		messages := []models.Message{}
+
 		similarDocs, err := embeddingRepo.SearchSimilarity(embbeding, 2)
+
 		userMessage := fmt.Sprintf(promptTemplate, input, strings.Join(similarDocs, "\n"))
 		messages = append(messages, models.Message{Role: "user", Content: userMessage})
 
