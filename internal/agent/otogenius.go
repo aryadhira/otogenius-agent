@@ -1,89 +1,108 @@
 package agent
 
 import (
-	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/aryadhira/otogenius-agent/internal/llm"
 	"github.com/aryadhira/otogenius-agent/internal/models"
-	"github.com/aryadhira/otogenius-agent/internal/tools"
+	"github.com/aryadhira/otogenius-agent/internal/repository"
 )
 
 type Otogenius struct {
-	client llm.LlmProvider
-	tools  []models.Tool
+	llm           llm.LlmProvider
+	embed         llm.LlmProvider
+	embeddingRepo repository.EmbeddingRepo
 }
 
-func NewOtogenius(client llm.LlmProvider, tools []models.Tool) Agent {
+func NewOtogenius(llm, embed llm.LlmProvider, repo repository.EmbeddingRepo) Agent {
 	return &Otogenius{
-		client: client,
-		tools:  tools,
+		llm:           llm,
+		embed:         embed,
+		embeddingRepo: repo,
 	}
 }
 
-func getSystemPrompt(toolsDesc string) string {
-	promptTemplate := `
-		You are a specialized AI agent designed to assist customers in finding used cars. Your role is to identify a user's requirements from their query and trigger the appropriate function call.
+func getPromptTemplate() string {
+	return `
+		please extract this user used car preferences query : 
+		%s
+		
+		your output will be json in this schema :
+		{
+			brand : <string> optional (this will contains any brand that user mention, leave as empty string if user not mention any brand),
+			model : <string> optional(this will contains any model that user mention, leave as empty string if user not mention any model),
+			category : <string> mandatory (Enums: Sedan,SUV,MPV,Hatchback) you will clasify this value based on this context %s,
+			price : <integer> mandatory you will extract user budget or preference price, fill 0 if user not mention,
+			production_year : <integer> optional you will extract any mentioned production_year of the car fill 0 if user not mention any year,
+			transmission : <string> (Enums:Automatic,Manual) optional you will extract any mentioned transmission type from user,  leave as empty string if user not mention any transmission type,
+		} 
 
-		1. Available Tools
-			You have access to one tool: get_car_catalog. Use this tool only when a user explicitly requests to search for a used car and provides all mandatory information.
-		2. Tool Definitions
-			%s
-		3. Agents Behavior
-			- Triggering the Function: You must call the find_used_car function whenever a user provides all the mandatory parameters (price and category). You should fill in any optional parameters you can identify.
-			- Handling Missing Information: If the user's query is missing a mandatory parameter (price or category), do not attempt to call the function. Instead, you must politely and clearly ask the user for the missing information.
-			- Constraint: You are an agent for searching used cars. If a user asks for something completely unrelated, you should respond with a friendly message stating that your capabilities are limited to finding cars. For example: "I can only help you find used cars. What kind of car are you looking for?"
+		this is example of minimal requirement json result  : 
+		{
+			"brand" : "",
+			"model" : "",
+			"category" : "Sedan",
+			"price" : 200000000,
+			"production_year" : 0,
+			"transmission": ""
+		}
+		this is example of requirement with multiple brand and selected production year json result :
+		{
+			"brand" : "Toyota,Honda",
+			"model" : "",
+			"category" : "Sedan",
+			"price" : 200000000,
+			"production_year" : 2010,
+			"transmission": ""
+		}
+		this is example of requirement with multiple brand & model and selected production year json result :
+		{
+			"brand" : "Toyota,Honda",
+			"model" : "Civic,Corolla",
+			"category" : "Sedan",
+			"price" : 200000000,
+			"production_year" : 2010,
+			"transmission": ""
+		}
+		this is example of requirement with multiple brand & model and selected production year and selected transmission type json result :
+		{
+			"brand" : "Toyota,Honda",
+			"model" : "Civic,Corolla",
+			"category" : "Sedan",
+			"price" : 200000000,
+			"production_year" : 2010,
+			"transmission": "Automatic"
+		}
 	`
-	return fmt.Sprintf(promptTemplate,toolsDesc)
 }
 
 func (s *Otogenius) Run(prompt string) (any, error) {
-	return nil, nil
-}
-
-func (s *Otogenius) RunContinues(prompt string, messages []models.Message) (any, error) {
-	fmt.Println("\x1b[3m\nstart retrieving recommendation based your requirement")
-	if len(messages) == 0 {
-		toolsJson, _ := json.Marshal(s.tools)
-
-		messages = append(messages, models.Message{Role: "system", Content: getSystemPrompt(string(toolsJson))})
-	}
-
-	messages = append(messages, models.Message{Role: "user", Content: prompt})
-
-	response, err := s.client.ChatCompletions(messages, s.tools)
+	embbeding, err := s.embed.GetEmbedding(prompt)
 	if err != nil {
 		return nil, err
 	}
 
-	choice := response.Choices[0]
-	message := choice.Message
-
-	if len(message.ToolCalls) > 0 {
-		toolResponse, err := tools.ToolCalling(message)
-		if err != nil {
-			return nil, err
-		}
-
-		messages = append(messages, toolResponse...)
-		usedCarList := []models.CarInfo{}
-		listStr := toolResponse[len(toolResponse)-1].Content.(string)
-		err = json.Unmarshal([]byte(listStr),&usedCarList)
-		if err != nil {
-			return nil, err
-		}
-
-		fmt.Println("\nOtogenius: ")
-		for _,each := range usedCarList {
-			fmt.Printf("Brand : %s \nModel : %s \nYear: %v \nPrice: %v \nTransmission: %s \nVarian: %s \n====================================\n", each.Brand, each.Model, each.ProductionYear, int(each.Price),each.Transmission, each.Varian)
-		}
-		fmt.Println("\x1b[0m")
-
-		// fmt.Println("result :", toolResponse[len(toolResponse)-1].Content,"\x1b[0m")
-	} else {
-		messages = append(messages, models.Message{Role: "assistant", Content: message.Content})
-		fmt.Printf("\nOtogenius: \n%s\n\x1b[0m", message.Content)
+	similarDocs, err := s.embeddingRepo.SearchSimilarity(embbeding, 2)
+	if err != nil {
+		return nil, err
 	}
 
-	return messages, nil
+	messages := []models.Message{}
+	userMessage := fmt.Sprintf(getPromptTemplate(), prompt, strings.Join(similarDocs, "\n"))
+	messages = append(messages, models.Message{Role: "user", Content: userMessage})
+
+	response, err := s.llm.ChatCompletions(messages, []models.Tool{})
+	if err != nil {
+		return nil, err
+	}
+
+	responseStr := response.Choices[0].Message.Content.(string)
+
+	return responseStr, nil
+}
+
+func (s *Otogenius) RunContinues(prompt string, messages []models.Message) (any, error) {
+
+	return nil, nil
 }

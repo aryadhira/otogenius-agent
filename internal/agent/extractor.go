@@ -22,7 +22,7 @@ func NewAgentExtractor(client llm.LlmProvider, masterdata []models.BrandModel) A
 }
 
 func (a *AgentExtractor) Run(prompt string) (any, error) {
-	fmt.Println("\x1b[3m start parsing user requirement")
+	// fmt.Println("\x1b[3m start parsing user requirement")
 	systemMessage, err := getExtractorSystemPrompt(a.masterdata)
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func (a *AgentExtractor) Run(prompt string) (any, error) {
 	choice := response.Choices[0]
 	aiResponse := choice.Message.Content.(string)
 
-	fmt.Println("\x1b[3m parsed requirement", aiResponse)
+	fmt.Println("without RAG: \n", aiResponse)
 	// sanitize AI response additional string
 	sanitizedStr := strings.ReplaceAll(aiResponse, "```json", "")
 	sanitizedStr = strings.ReplaceAll(sanitizedStr, "```", "")
@@ -136,6 +136,6 @@ func getExtractorSystemPrompt(masterdata []models.BrandModel) (string, error) {
 	return fmt.Sprintf(sysMessageTemplate, brand.String(), model.String()), nil
 }
 
-func (a *AgentExtractor) RunContinues(prompt string, messages []models.Message) (any, error){
+func (a *AgentExtractor) RunContinues(prompt string, messages []models.Message) (any, error) {
 	return nil, nil
 }

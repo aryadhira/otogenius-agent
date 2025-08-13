@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/aryadhira/otogenius-agent/internal/models"
@@ -117,6 +118,8 @@ func (c *CarInfoImp) GetCarData(filter map[string]any) ([]models.CarInfo, error)
 	query := "SELECT brand, model, production_year, category, varian, fuel, transmission, image_url, price FROM car_info "
 	finalQuery := parseFilter(query, filter)
 
+	log.Println(finalQuery)
+
 	rows, err := c.db.QueryContext(c.ctx, finalQuery)
 	if err != nil {
 		return nil, err
@@ -141,7 +144,7 @@ func (c *CarInfoImp) GetCarData(filter map[string]any) ([]models.CarInfo, error)
 		}
 		results = append(results, data)
 	}
-	return results, nil
+	return results, err
 }
 
 func parseFilter(query string, filter map[string]any) string {
@@ -157,7 +160,7 @@ func parseFilter(query string, filter map[string]any) string {
 
 		strFilter := filterFormatter(key, val)
 		if filterCount == 0 {
-			sb.WriteString("WHERE ")
+			sb.WriteString("WHERE \n")
 			sb.WriteString(strFilter)
 		} else {
 			andFilterString := fmt.Sprintf("AND %s", strFilter)
@@ -174,11 +177,19 @@ func filterFormatter(key string, val any) string {
 	switch key {
 	case "brand", "model", "transmission":
 		strFilter := strings.Split(val.(string), ",")
-		tempStr := []string{}
-		for _, each := range strFilter {
-			tempStr = append(tempStr, fmt.Sprintf("'%s' ", each))
+		for i, each := range strFilter {
+			if i == 0 {
+				filterFormat += "( "
+			}
+			if i > 0 {
+				filterFormat += "OR "
+			}
+			filterFormat += key + " ILIKE '%" + each + "%' \n"
+			if i == len(strFilter)-1 {
+				filterFormat += ")"
+			}
 		}
-		filterFormat = fmt.Sprintf("%s IN (%s) ", key, strings.Join(tempStr, ", "))
+
 	case "production_year":
 		filterFormat = fmt.Sprintf("%s >= %v ", key, val)
 	case "price":
