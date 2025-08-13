@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Fuel, Joystick, Receipt } from "lucide-react";
 import { useState } from "react";
 import { getRecommendation } from "./recommendation";
+import { toast } from "sonner";
 const Home = () => {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,13 @@ const Home = () => {
     console.log(res)
     if (res.status == 200) {
       setLoading(false);
-      setResult(res.data);
+      if (res.data.length > 0) {
+        setResult(res.data);
+      }else{
+        toast("Result Not Found", {
+          description:"Please refine the prompt!!"
+        })
+      }
     }
     
   };
@@ -44,13 +51,17 @@ const Home = () => {
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
           />
-          <Button onClick={handleSubmit}  disabled={loading} className={"w-full"}>
+          <Button
+            onClick={handleSubmit}
+            disabled={loading}
+            className={"w-full"}
+          >
             {loading ? "Finding..." : "Find My Car"}
           </Button>
         </div>
       </div>
       <div className="grid grid-cols-3 xl:grid-cols-5 gap-5 p-10">
-        {result.map((item,idx) => (
+        {result.map((item, idx) => (
           <div key={idx} className="max-w-[300] min-h-[350]">
             <Card>
               <CardHeader>
@@ -62,10 +73,12 @@ const Home = () => {
               <CardContent>
                 <div className="flex flex-col gap-5 text-sm">
                   <img
-                    src={item.image_url}
-                    width={200}
-                    
-                    alt="car"
+                    src={item.image_url || "https://placehold.co/300x300"}
+                    onError={(e) =>
+                      (e.currentTarget.src = "https://placehold.co/300x300")
+                    }
+                    alt={`${item.brand} ${item.model}`}
+                    className="w-full h-48 object-cover rounded"
                   />
                   <div className="flex flex-col gap-1 text-xs">
                     <div className="flex gap-2 items-center">

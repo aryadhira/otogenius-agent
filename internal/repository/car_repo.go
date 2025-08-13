@@ -168,7 +168,7 @@ func parseFilter(query string, filter map[string]any) string {
 		}
 		filterCount++
 	}
-	sb.WriteString("ORDER BY production_year DESC, price ASC LIMIT 15")
+	sb.WriteString("ORDER BY price DESC, production_year DESC  LIMIT 20")
 	return sb.String()
 }
 
