@@ -4,7 +4,7 @@ export const getRecommendation = async(param) =>{
     let result = []
     try {
       
-      const res = await fetch("http://localhost:9009/api/recommendation", {
+      const res = await fetch("http://0.0.0.0:9009/api/recommendation", {
         method: "POST",
         body: JSON.stringify(param),
       });

@@ -184,11 +184,13 @@ func filterFormatter(key string, val any) string {
 			if i > 0 {
 				filterFormat += "OR "
 			}
-			filterFormat += key + " ILIKE '%" + each + "%' \n"
+			filterFormat += key + " ILIKE '%" + strings.TrimSpace(each) + "%' \n"
 			if i == len(strFilter)-1 {
 				filterFormat += ")"
 			}
 		}
+	case "category":
+		filterFormat = key + " ILIKE '%" + strings.TrimSpace(val.(string)) + "%' "
 
 	case "production_year":
 		filterFormat = fmt.Sprintf("%s >= %v ", key, val)
